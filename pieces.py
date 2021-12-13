@@ -27,7 +27,7 @@ class Pawn(Piece):
         moves = []
         try:
             if self.color == "b":
-                if i < 7:
+                if i < 8:
                     p = board[i][j + 1]
                     if p == '0' or p == '1':
                         moves.append((i, j + 1))
@@ -46,7 +46,7 @@ class Pawn(Piece):
                                 moves.append((i + 1, j - 1))
 
                 if self.first:
-                    if i < 6:
+                    if i < 8:
                         p = board[i][j + 2]
                         if p == '0' or p == '1':
                             if board[i][j + 1] == '0' or board[i][j + 1] == '1':
@@ -57,7 +57,7 @@ class Pawn(Piece):
             # WHITE
             else:
 
-                if i > 0:
+                if i >= 0:
                     p = board[i][j - 1]
                     if p == '0' or p == '1':
                         moves.append((i, j - 1))
@@ -75,7 +75,7 @@ class Pawn(Piece):
                             moves.append((i - 1, j - 1))
 
                 if self.first:
-                    if i > 1:
+                    if i >= 0:
                         p = board[i][j - 2]
                         if p == '0' or p == '1':
                             if board[i][j - 1] == '0' or board[i][j - 1] == '1':
