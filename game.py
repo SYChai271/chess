@@ -35,11 +35,12 @@ class App:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = self.get_click_square(pygame.mouse.get_pos())
                     self.get_selected_piece(position)
-                    if self.selected_piece is not None:
+                    if self.selected_piece is not None and self.selected_piece.color == self.turn:
                         self.highlight_selected_piece()
                         moves = self.selected_piece.valid_moves(board)
-                        self.highlight_valid_moves(moves)   
-                    self.move(position, moves)
+                        self.highlight_valid_moves(moves)
+                    if self.selected_piece_prev is not None:
+                        self.move(position, moves)
                     self.selected_piece_prev = self.selected_piece
                     self.selected_piece = None
 
@@ -58,9 +59,13 @@ class App:
             for j in range(8):
                 if self.BOARD[i, j] == 1:
                     self.draw_square('w', (i, j))
+        for i in range(8):
+            for j in range(8):
+                if self.BOARD[i, j] == 0:
+                    self.draw_square('b', (i, j))
 
     def on_start(self):
-        self.screen.fill((50, 50, 50))
+        self.screen.fill((0, 74, 158))
         self.draw_board()
         for i in range(len(self.starting_position)):
             for j in range(len(self.starting_position[i])):
@@ -73,10 +78,10 @@ class App:
     
     def draw_square(self, color, pos):
         if color == 'b':
-            pygame.draw.rect(self.screen, (50, 50, 50),
+            pygame.draw.rect(self.screen, (125, 135, 150),
                                     (pos[0] * 80, pos[1] * 80, 80, 80))
         else:
-            pygame.draw.rect(self.screen, (255, 255, 255),
+            pygame.draw.rect(self.screen, (232, 235, 239),
                                     (pos[0] * 80, pos[1] * 80, 80, 80))
     
     def draw_piece(self, color, piece, pos):
@@ -110,22 +115,27 @@ class App:
             return (pos[0] // 80, pos[1] // 80)
 
     def get_selected_piece(self, pos):
-        if self.turn == 'b':
-            for pieces in self.b_pieces.values():
-                if pieces.pos == pos:
-                    self.selected_piece = pieces
-                    break
-        else:
-            for pieces in self.w_pieces.values():
-                if pieces.pos == pos:
-                    self.selected_piece = pieces
-                    break
+        for pieces in self.b_pieces.values():
+            if pieces.pos == pos:
+                self.selected_piece = pieces
+                break
+        for pieces in self.w_pieces.values():
+            if pieces.pos == pos:
+                self.selected_piece = pieces
+                break
 
     def highlight_valid_moves(self, moves):
         if self.selected_piece is not None:
             for move in moves:
                 self.screen.fill(
                     (128, 128, 255), (move[0] * 80, move[1] * 80, 80, 80))
+                for pieces in self.b_pieces.values():
+                    if pieces.pos == move:
+                        self.draw_piece(pieces.color, pieces.type, pieces.pos)
+                for pieces in self.w_pieces.values():
+                    if pieces.pos == move:
+                        self.draw_piece(pieces.color, pieces.type, pieces.pos)
+                    
         if self.selected_piece != self.selected_piece_prev and self.selected_piece.color == self.turn and self.selected_piece_prev is not None:
             moves = self.selected_piece_prev.valid_moves(board)
             for move in moves:
@@ -149,12 +159,30 @@ class App:
                     else:
                         self.draw_square('b', move)
                 self.draw_piece(self.selected_piece_prev.color, self.selected_piece_prev.type, pos)
+
                 if self.turn == 'b':
                     self.turn = 'w'
+                    for pieces in self.w_pieces.values():
+                        if pieces.pos != pos:
+                            self.draw_piece(pieces.color, pieces.type, pieces.pos)
+                            
+                    for key, value in self.w_pieces.items():
+                        if value.pos == pos:
+                            del self.w_pieces[key]
+                            break
                 else:
                     self.turn = 'b'
+                    for pieces in self.b_pieces.values():
+                        if pieces.pos != pos:
+                            self.draw_piece(pieces.color, pieces.type, pieces.pos)
+
+                    for key, value in self.b_pieces.items():
+                        if value.pos == pos:
+                            del self.b_pieces[key]
+                            break
                 self.selected_piece_prev.pos = pos
                 board[self.selected_piece_prev.pos[0]][self.selected_piece_prev.pos[1]] = self.selected_piece_prev.color
                 self.selected_piece_prev = None
+                self.selected_piece = None
         except:
             pass
