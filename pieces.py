@@ -16,7 +16,7 @@ class Pawn(Piece):
     def __init__(self, pos, color):
         super().__init__(pos, color)
         self.en_peasant = False
-        self.double_move = True
+        self.first = True
         self.promote = False
         self.type = "Pawn"
 
@@ -27,51 +27,61 @@ class Pawn(Piece):
         moves = []
         try:
             if self.color == "b":
-
-                # DIAGONAL
-                if j < 7:
-                    p = board[i + 1][j + 1]
-                    if p != 0:
-                        if p != self.color:
-                            moves.append((i + 1, j + 1))
-
-                if j > 0:
-                    p = board[i + 1][j - 1]
-                    if p != 0:
-                        if p != self.color:
-                            moves.append((i + 1, j - 1))
-
-            if self.first:
-                if i < 6:
-                    p = board[i + 2][j]
+                if i < 7:
+                    p = board[i][j + 1]
                     if p == '0' or p == '1':
-                        if board[i + 1][j] == 0:
-                            moves.append((i + 2, j))
-                    elif p != self.color:
-                        moves.append((i + 2, j))
+                        moves.append((i, j + 1))
+
+                    # DIAGONAL
+                    if j < 7:
+                        p = board[i + 1][j + 1]
+                        if p != '0' and p != '1':
+                            if p != self.color:
+                                moves.append((i + 1, j + 1))
+
+                    if j > 0:
+                        p = board[i + 1][j - 1]
+                        if p != '0' and p != '1':
+                            if p != self.color:
+                                moves.append((i + 1, j - 1))
+
+                if self.first:
+                    if i < 6:
+                        p = board[i][j + 2]
+                        if p == '0' or p == '1':
+                            if board[i][j + 1] == '0' or board[i][j + 1] == '1':
+                                moves.append((i, j + 2))
+                        elif p != self.color:
+                            moves.append((i, j + 2))
+
             # WHITE
             else:
 
+                if i > 0:
+                    p = board[i][j - 1]
+                    if p == '0' or p == '1':
+                        moves.append((i, j - 1))
+
                 if j < 7:
                     p = board[i - 1][j + 1]
-                    if p != 0:
+                    if p != '0' and p != '1':
                         if p != self.color:
                             moves.append((i - 1, j + 1))
 
                 if j > 0:
                     p = board[i - 1][j - 1]
-                    if p != 0:
+                    if p != '0' and p != '1':
                         if p != self.color:
                             moves.append((i - 1, j - 1))
 
-                if self.double_move:
+                if self.first:
                     if i > 1:
-                        p = board[i - 2][j]
+                        p = board[i][j - 2]
                         if p == '0' or p == '1':
-                            if board[i - 1][j] == 0:
-                                moves.append((i - 2, j))
+                            if board[i][j - 1] == '0' or board[i][j - 1] == '1':
+                                moves.append((i, j - 2))
                         elif p != self.color:
-                            moves.append((i - 2, j))
+                            moves.append((i, j - 2))
         except:
             pass
 
@@ -81,7 +91,7 @@ class Pawn(Piece):
 class Rook(Piece):
     def __init__(self, pos, color):
         super().__init__(pos, color)
-        self.has_moved = False
+        self.first = True
         self.type = "Rook"
 
     def valid_moves(self, board):
@@ -406,7 +416,7 @@ class Queen(Piece):
 class King(Piece):
     def __init__(self, pos, color):
         super().__init__(pos, color)
-        self.has_moved = False
+        self.first = True
         self.type = "King"
 
     def valid_moves(self, board):

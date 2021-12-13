@@ -180,6 +180,10 @@ class App:
                         if value.pos == pos:
                             del self.b_pieces[key]
                             break
+                try:
+                    self.selected_piece_prev.first = False
+                except:
+                    pass
                 self.selected_piece_prev.pos = pos
                 board[self.selected_piece_prev.pos[0]][self.selected_piece_prev.pos[1]] = self.selected_piece_prev.color
                 self.selected_piece_prev = None
