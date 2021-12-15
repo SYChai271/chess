@@ -5,6 +5,7 @@ import sys
 
 reverse_board = True
 
+
 class Piece:
     def __init__(self, pos, color):
         self.pos = pos
@@ -56,9 +57,34 @@ class Pawn(Piece):
                             elif p != self.color:
                                 moves.append((i, j + 2))
 
-            # WHITE
-            else:
+                # WHITE
+                else:
+                    if i >= 0:
+                        p = board[i][j - 1]
+                        if p == '0' or p == '1':
+                            moves.append((i, j - 1))
 
+                    if j < 7:
+                        p = board[i - 1][j + 1]
+                        if p != '0' and p != '1':
+                            if p != self.color:
+                                moves.append((i - 1, j + 1))
+
+                    if j > 0:
+                        p = board[i - 1][j - 1]
+                        if p != '0' and p != '1':
+                            if p != self.color:
+                                moves.append((i - 1, j - 1))
+
+                    if self.first:
+                        if i >= 0:
+                            p = board[i][j - 2]
+                            if p == '0' or p == '1':
+                                if board[i][j - 1] == '0' or board[i][j - 1] == '1':
+                                    moves.append((i, j - 2))
+                            elif p != self.color:
+                                moves.append((i, j - 2))
+            else:
                 if i >= 0:
                     p = board[i][j - 1]
                     if p == '0' or p == '1':

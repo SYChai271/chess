@@ -1,7 +1,6 @@
 import pygame
 import numpy as np
 import sys
-import math
 from pieces import *
 
 pygame.init()
@@ -42,7 +41,8 @@ class App:
                         self.highlight_valid_moves(moves)
                     if self.selected_piece_prev is not None:
                         self.move(position, moves)
-                        self.reverse_board()
+                        if reverse_board:
+                            self.reverse_board()
                     self.selected_piece_prev = self.selected_piece
                     self.selected_piece = None
 
@@ -65,7 +65,7 @@ class App:
             for j in range(8):
                 if self.BOARD[i, j] == 0:
                     self.draw_square('b', (i, j))
-    
+
     def reverse_board(self):
         global board
         # reverse board
@@ -87,12 +87,12 @@ class App:
             pieces.pos = (abs(7-pieces.pos[0]), abs(7-pieces.pos[1]))
             board[pieces.pos[0]][pieces.pos[1]] = pieces.color
             self.draw_piece(pieces.color, pieces.type, pieces.pos)
-        
+
         for pieces in self.w_pieces.values():
             pieces.pos = (abs(7-pieces.pos[0]), abs(7-pieces.pos[1]))
             board[pieces.pos[0]][pieces.pos[1]] = pieces.color
             self.draw_piece(pieces.color, pieces.type, pieces.pos)
-        
+
     def on_start(self):
         self.screen.fill((0, 74, 158))
         self.draw_board()
@@ -104,15 +104,15 @@ class App:
         for i in range(len(_reversed)):
             for j in range(len(_reversed[i])):
                 self.draw_piece('w', _reversed[i][j], (j, i+6))
-    
+
     def draw_square(self, color, pos):
         if color == 'b':
             pygame.draw.rect(self.screen, (125, 135, 150),
-                                    (pos[0] * 80, pos[1] * 80, 80, 80))
+                             (pos[0] * 80, pos[1] * 80, 80, 80))
         else:
             pygame.draw.rect(self.screen, (232, 235, 239),
-                                    (pos[0] * 80, pos[1] * 80, 80, 80))
-    
+                             (pos[0] * 80, pos[1] * 80, 80, 80))
+
     def draw_piece(self, color, piece, pos):
         if color == 'b':
             self.screen.blit(pygame.image.load(
@@ -125,19 +125,22 @@ class App:
         if self.selected_piece is not None and self.selected_piece_prev is None:
             self.screen.fill(
                 (128, 128, 255), (self.selected_piece.pos[0] * 80, self.selected_piece.pos[1] * 80, 80, 80))
-            self.draw_piece(self.selected_piece.color, self.selected_piece.type, self.selected_piece.pos)
+            self.draw_piece(self.selected_piece.color,
+                            self.selected_piece.type, self.selected_piece.pos)
         elif self.selected_piece is not None and self.selected_piece_prev is not None:
             if self.BOARD[self.selected_piece_prev.pos[0]][self.selected_piece_prev.pos[1]] == 1:
                 self.draw_square('w', self.selected_piece_prev.pos)
             else:
                 self.draw_square('b', self.selected_piece_prev.pos)
 
-            self.draw_piece(self.selected_piece_prev.color, self.selected_piece_prev.type, self.selected_piece_prev.pos)
+            self.draw_piece(self.selected_piece_prev.color,
+                            self.selected_piece_prev.type, self.selected_piece_prev.pos)
 
             self.screen.fill(
                 (128, 128, 255), (self.selected_piece.pos[0] * 80, self.selected_piece.pos[1] * 80, 80, 80))
 
-            self.draw_piece(self.selected_piece.color, self.selected_piece.type, self.selected_piece.pos)
+            self.draw_piece(self.selected_piece.color,
+                            self.selected_piece.type, self.selected_piece.pos)
 
     def get_click_square(self, pos):
         if pos[0] < 640 and pos[1] < 640:
@@ -164,7 +167,7 @@ class App:
                 for pieces in self.w_pieces.values():
                     if pieces.pos == move:
                         self.draw_piece(pieces.color, pieces.type, pieces.pos)
-                    
+
         if self.selected_piece != self.selected_piece_prev and self.selected_piece.color == self.turn and self.selected_piece_prev is not None:
             moves = self.selected_piece_prev.valid_moves(board)
             for move in moves:
@@ -172,29 +175,33 @@ class App:
                     self.draw_square('w', move)
                 else:
                     self.draw_square('b', move)
-                
+
     def move(self, pos, moves):
         try:
             if pos in moves:
                 if self.BOARD[self.selected_piece_prev.pos[0]][self.selected_piece_prev.pos[1]] == 1:
                     self.draw_square('w', self.selected_piece_prev.pos)
-                    board[self.selected_piece_prev.pos[0]][self.selected_piece_prev.pos[1]] = '1'
+                    board[self.selected_piece_prev.pos[0]
+                          ][self.selected_piece_prev.pos[1]] = '1'
                 else:
                     self.draw_square('b', self.selected_piece_prev.pos)
-                    board[self.selected_piece_prev.pos[0]][self.selected_piece_prev.pos[1]] = '0'
+                    board[self.selected_piece_prev.pos[0]
+                          ][self.selected_piece_prev.pos[1]] = '0'
                 for move in moves:
                     if self.BOARD[move[0]][move[1]] == 1:
                         self.draw_square('w', move)
                     else:
                         self.draw_square('b', move)
-                self.draw_piece(self.selected_piece_prev.color, self.selected_piece_prev.type, pos)
+                self.draw_piece(self.selected_piece_prev.color,
+                                self.selected_piece_prev.type, pos)
 
                 if self.turn == 'b':
                     self.turn = 'w'
                     for pieces in self.w_pieces.values():
                         if pieces.pos != pos:
-                            self.draw_piece(pieces.color, pieces.type, pieces.pos)
-                            
+                            self.draw_piece(
+                                pieces.color, pieces.type, pieces.pos)
+
                     for key, value in self.w_pieces.items():
                         if value.pos == pos:
                             del self.w_pieces[key]
@@ -203,7 +210,8 @@ class App:
                     self.turn = 'b'
                     for pieces in self.b_pieces.values():
                         if pieces.pos != pos:
-                            self.draw_piece(pieces.color, pieces.type, pieces.pos)
+                            self.draw_piece(
+                                pieces.color, pieces.type, pieces.pos)
 
                     for key, value in self.b_pieces.items():
                         if value.pos == pos:
@@ -214,7 +222,8 @@ class App:
                 except:
                     pass
                 self.selected_piece_prev.pos = pos
-                board[self.selected_piece_prev.pos[0]][self.selected_piece_prev.pos[1]] = self.selected_piece_prev.color
+                board[self.selected_piece_prev.pos[0]
+                      ][self.selected_piece_prev.pos[1]] = self.selected_piece_prev.color
                 self.selected_piece_prev = None
                 self.selected_piece = None
         except:
