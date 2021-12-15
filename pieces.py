@@ -3,12 +3,13 @@ import numpy as np
 import sys
 
 
+reverse_board = True
+
 class Piece:
     def __init__(self, pos, color):
         self.pos = pos
         self.row, self.col = pos[0], pos[1]
         self.color = color
-        self.highlight = False
         self.type = "Piece"
 
 
@@ -26,33 +27,34 @@ class Pawn(Piece):
 
         moves = []
         try:
-            if self.color == "b":
-                if i < 8:
-                    p = board[i][j + 1]
-                    if p == '0' or p == '1':
-                        moves.append((i, j + 1))
-
-                    # DIAGONAL
-                    if j < 7:
-                        p = board[i + 1][j + 1]
-                        if p != '0' and p != '1':
-                            if p != self.color:
-                                moves.append((i + 1, j + 1))
-
-                    if j > 0:
-                        p = board[i + 1][j - 1]
-                        if p != '0' and p != '1':
-                            if p != self.color:
-                                moves.append((i + 1, j - 1))
-
-                if self.first:
+            if not reverse_board:
+                if self.color == 'b':
                     if i < 8:
-                        p = board[i][j + 2]
+                        p = board[i][j + 1]
                         if p == '0' or p == '1':
-                            if board[i][j + 1] == '0' or board[i][j + 1] == '1':
+                            moves.append((i, j + 1))
+
+                        # DIAGONAL
+                        if j < 7:
+                            p = board[i + 1][j + 1]
+                            if p != '0' and p != '1':
+                                if p != self.color:
+                                    moves.append((i + 1, j + 1))
+
+                        if j > 0:
+                            p = board[i + 1][j - 1]
+                            if p != '0' and p != '1':
+                                if p != self.color:
+                                    moves.append((i + 1, j - 1))
+
+                    if self.first:
+                        if i < 8:
+                            p = board[i][j + 2]
+                            if p == '0' or p == '1':
+                                if board[i][j + 1] == '0' or board[i][j + 1] == '1':
+                                    moves.append((i, j + 2))
+                            elif p != self.color:
                                 moves.append((i, j + 2))
-                        elif p != self.color:
-                            moves.append((i, j + 2))
 
             # WHITE
             else:

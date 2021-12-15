@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import sys
+import math
 from pieces import *
 
 pygame.init()
@@ -41,6 +42,7 @@ class App:
                         self.highlight_valid_moves(moves)
                     if self.selected_piece_prev is not None:
                         self.move(position, moves)
+                        self.reverse_board()
                     self.selected_piece_prev = self.selected_piece
                     self.selected_piece = None
 
@@ -63,7 +65,34 @@ class App:
             for j in range(8):
                 if self.BOARD[i, j] == 0:
                     self.draw_square('b', (i, j))
+    
+    def reverse_board(self):
+        global board
+        # reverse board
+        self.BOARD = np.flip(self.BOARD, 0)
+        board = np.flip(board, 0)
 
+        # draw the board
+        for i in range(8):
+            for j in range(8):
+                if self.BOARD[i, j] == 1:
+                    self.draw_square('w', (i, j))
+        for i in range(8):
+            for j in range(8):
+                if self.BOARD[i, j] == 0:
+                    self.draw_square('b', (i, j))
+
+        # update pieces pos
+        for pieces in self.b_pieces.values():
+            pieces.pos = (abs(7-pieces.pos[0]), abs(7-pieces.pos[1]))
+            board[pieces.pos[0]][pieces.pos[1]] = pieces.color
+            self.draw_piece(pieces.color, pieces.type, pieces.pos)
+        
+        for pieces in self.w_pieces.values():
+            pieces.pos = (abs(7-pieces.pos[0]), abs(7-pieces.pos[1]))
+            board[pieces.pos[0]][pieces.pos[1]] = pieces.color
+            self.draw_piece(pieces.color, pieces.type, pieces.pos)
+        
     def on_start(self):
         self.screen.fill((0, 74, 158))
         self.draw_board()
