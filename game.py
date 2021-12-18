@@ -41,8 +41,6 @@ class App:
                         self.highlight_valid_moves(moves)
                     if self.selected_piece_prev is not None:
                         self.move(position, moves)
-                        if reverse_board:
-                            self.reverse_board()
                     self.selected_piece_prev = self.selected_piece
                     self.selected_piece = None
 
@@ -226,5 +224,7 @@ class App:
                       ][self.selected_piece_prev.pos[1]] = self.selected_piece_prev.color
                 self.selected_piece_prev = None
                 self.selected_piece = None
+                if reverse_board:
+                    self.reverse_board()
         except:
             pass
