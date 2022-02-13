@@ -28,7 +28,7 @@ class App:
         self.BOARD = np.flip(self.BOARD, 0)
         # starting position of all the pieces on the board
         # (0, 0) top left
-        # initiate the piecse objects that is imported from pieces.py
+        # initiate the piece objects that is imported from pieces.py
         self.b_pieces = {'rook1': Rook((0, 0), 'b'), 'rook2': Rook((7, 0), 'b'), 'knight1': Knight((1, 0), 'b'), 'knight2': Knight((6, 0), 'b'), 'bishop1': Bishop((2, 0), 'b'), 'bishop2': Bishop((5, 0), 'b'), 'queen': Queen((3, 0), 'b'), 'king': King(
             (4, 0), 'b'), 'pawn1': Pawn((0, 1), 'b'), 'pawn2': Pawn((1, 1), 'b'), 'pawn3': Pawn((2, 1), 'b'), 'pawn4': Pawn((3, 1), 'b'), 'pawn5': Pawn((4, 1), 'b'), 'pawn6': Pawn((5, 1), 'b'), 'pawn7': Pawn((6, 1), 'b'), 'pawn8': Pawn((7, 1), 'b')}
         self.w_pieces = {'rook1': Rook((0, 7), 'w'), 'rook2': Rook((7, 7), 'w'), 'knight1': Knight((1, 7), 'w'), 'knight2': Knight((6, 7), 'w'), 'bishop1': Bishop((2, 7), 'w'), 'bishop2': Bishop((5, 7), 'w'), 'queen': Queen((3, 7), 'w'), 'king': King(
