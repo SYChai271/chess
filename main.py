@@ -1,46 +1,57 @@
 import pygame
 import numpy as np
-import sys
 from pieces import *
+from constants import *
 
 pygame.init()
+
+# main class for the game
+# contains the game loop and the game logic
 
 
 class App:
     def __init__(self):
         self._running = True
-        self.screen = pygame.display.set_mode((640, 640))
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.starting_position = [
             ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Bishop', 'Knight', 'Rook'], ['Pawn' for i in range(8)]]
         self.turn = 'w'
         self.selected_piece = None
+        self.selected_square = None
         self.selected_piece_prev = None
+        # BOARD constant that does not change
+        # BOARD constatnt is in integer form and is used to represent black and white squares on the board
         self.BOARD = np.zeros((8, 8), dtype=int)
         self.BOARD[:: 2, 1:: 2] = 1
         self.BOARD[1:: 2, :: 2] = 1
+        # correctly orientate the board
         self.BOARD = np.flip(self.BOARD, 0)
+        # starting position of all the pieces on the board
+        # (0, 0) top left
+        # initiate the piecse objects that is imported from pieces.py
         self.b_pieces = {'rook1': Rook((0, 0), 'b'), 'rook2': Rook((7, 0), 'b'), 'knight1': Knight((1, 0), 'b'), 'knight2': Knight((6, 0), 'b'), 'bishop1': Bishop((2, 0), 'b'), 'bishop2': Bishop((5, 0), 'b'), 'queen': Queen((3, 0), 'b'), 'king': King(
             (4, 0), 'b'), 'pawn1': Pawn((0, 1), 'b'), 'pawn2': Pawn((1, 1), 'b'), 'pawn3': Pawn((2, 1), 'b'), 'pawn4': Pawn((3, 1), 'b'), 'pawn5': Pawn((4, 1), 'b'), 'pawn6': Pawn((5, 1), 'b'), 'pawn7': Pawn((6, 1), 'b'), 'pawn8': Pawn((7, 1), 'b')}
         self.w_pieces = {'rook1': Rook((0, 7), 'w'), 'rook2': Rook((7, 7), 'w'), 'knight1': Knight((1, 7), 'w'), 'knight2': Knight((6, 7), 'w'), 'bishop1': Bishop((2, 7), 'w'), 'bishop2': Bishop((5, 7), 'w'), 'queen': Queen((3, 7), 'w'), 'king': King(
             (4, 7), 'w'), 'pawn1': Pawn((0, 6), 'w'), 'pawn2': Pawn((1, 6), 'w'), 'pawn3': Pawn((2, 6), 'w'), 'pawn4': Pawn((3, 6), 'w'), 'pawn5': Pawn((4, 6), 'w'), 'pawn6': Pawn((5, 6), 'w'), 'pawn7': Pawn((6, 6), 'w'), 'pawn8': Pawn((7, 6), 'w')}
         self.on_start()
 
+    # main game logic and game loop
     def run(self):
         while self._running:
+            # quit app if close button is pressed
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self._running = False
                     pygame.quit()
-                    sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = self.get_click_square(pygame.mouse.get_pos())
-                    self.get_selected_piece(position)
+                    self.selected_piece = self.get_selected_square(position)
                     if self.selected_piece is not None and self.selected_piece.color == self.turn:
                         self.highlight_selected_piece()
                         moves = self.selected_piece.valid_moves(board)
                         self.highlight_valid_moves(moves)
                     if self.selected_piece_prev is not None:
-                        self.move(position, moves)
+                        self.move(self.selected_square, moves)
                     self.selected_piece_prev = self.selected_piece
                     self.selected_piece = None
 
@@ -67,6 +78,8 @@ class App:
     def reverse_board(self):
         global board
         # reverse board
+        # board variable is used to represent the board in string form
+        # board variable is used to represent the pieces on the board (color)
         self.BOARD = np.flip(self.BOARD, 0)
         board = np.flip(board, 0)
 
@@ -92,7 +105,7 @@ class App:
             self.draw_piece(pieces.color, pieces.type, pieces.pos)
 
     def on_start(self):
-        self.screen.fill((0, 74, 158))
+        self.screen.fill(BG_COLOR)
         self.draw_board()
         for i in range(len(self.starting_position)):
             for j in range(len(self.starting_position[i])):
@@ -105,24 +118,20 @@ class App:
 
     def draw_square(self, color, pos):
         if color == 'b':
-            pygame.draw.rect(self.screen, (125, 135, 150),
-                             (pos[0] * 80, pos[1] * 80, 80, 80))
+            pygame.draw.rect(self.screen, BLACK_SQUARE,
+                             (pos[0] * SQUARE_SIZE, pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
         else:
-            pygame.draw.rect(self.screen, (232, 235, 239),
-                             (pos[0] * 80, pos[1] * 80, 80, 80))
+            pygame.draw.rect(self.screen, WHITE_SQUARE,
+                             (pos[0] * SQUARE_SIZE, pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
     def draw_piece(self, color, piece, pos):
-        if color == 'b':
-            self.screen.blit(pygame.image.load(
-                './images/' + "B_" + piece + '.png'), (pos[0] * 80+10, pos[1] * 80+10))
-        else:
-            self.screen.blit(pygame.image.load(
-                './images/' + "W_" + piece + '.png'), (pos[0] * 80+10, pos[1] * 80+10))
+        self.screen.blit(pygame.image.load(
+            get_piece_img(color, piece)), (pos[0] * SQUARE_SIZE+PIECE_PADDING, pos[1] * SQUARE_SIZE+PIECE_PADDING))
 
     def highlight_selected_piece(self):
         if self.selected_piece is not None and self.selected_piece_prev is None:
             self.screen.fill(
-                (128, 128, 255), (self.selected_piece.pos[0] * 80, self.selected_piece.pos[1] * 80, 80, 80))
+                SELECTED_SQUARE_COLOR, (self.selected_piece.pos[0] * SQUARE_SIZE, self.selected_piece.pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
             self.draw_piece(self.selected_piece.color,
                             self.selected_piece.type, self.selected_piece.pos)
         elif self.selected_piece is not None and self.selected_piece_prev is not None:
@@ -135,30 +144,29 @@ class App:
                             self.selected_piece_prev.type, self.selected_piece_prev.pos)
 
             self.screen.fill(
-                (128, 128, 255), (self.selected_piece.pos[0] * 80, self.selected_piece.pos[1] * 80, 80, 80))
+                SELECTED_SQUARE_COLOR, (self.selected_piece.pos[0] * SQUARE_SIZE, self.selected_piece.pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
             self.draw_piece(self.selected_piece.color,
                             self.selected_piece.type, self.selected_piece.pos)
 
     def get_click_square(self, pos):
         if pos[0] < 640 and pos[1] < 640:
-            return (pos[0] // 80, pos[1] // 80)
+            return (pos[0] // SQUARE_SIZE, pos[1] // SQUARE_SIZE)
 
-    def get_selected_piece(self, pos):
+    def get_selected_square(self, pos):
         for pieces in self.b_pieces.values():
-            if pieces.pos == pos:
-                self.selected_piece = pieces
-                break
+            if pieces.pos == pos and self.turn == 'b':
+                return pieces
         for pieces in self.w_pieces.values():
-            if pieces.pos == pos:
-                self.selected_piece = pieces
-                break
+            if pieces.pos == pos and self.turn == 'w':
+                return pieces
+        self.selected_square = pos
 
     def highlight_valid_moves(self, moves):
         if self.selected_piece is not None:
             for move in moves:
                 self.screen.fill(
-                    (128, 128, 255), (move[0] * 80, move[1] * 80, 80, 80))
+                    SELECTED_SQUARE_COLOR, (move[0] * SQUARE_SIZE, move[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
                 for pieces in self.b_pieces.values():
                     if pieces.pos == move:
                         self.draw_piece(pieces.color, pieces.type, pieces.pos)
@@ -224,6 +232,7 @@ class App:
                       ][self.selected_piece_prev.pos[1]] = self.selected_piece_prev.color
                 self.selected_piece_prev = None
                 self.selected_piece = None
+                self.selected_square = None
                 if reverse_board:
                     self.reverse_board()
         except:
