@@ -3,7 +3,7 @@ import numpy as np
 import sys
 
 
-reverse_board = True
+REVERSE_BOARD = True
 
 
 class Piece:
@@ -28,7 +28,7 @@ class Pawn(Piece):
 
         moves = []
         try:
-            if not reverse_board:
+            if not REVERSE_BOARD:
                 if self.color == 'b':
                     if i < 8:
                         p = board[i][j + 1]
