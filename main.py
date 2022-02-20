@@ -241,7 +241,6 @@ def main():
     on_start()
     _running = True
     while _running:
-        # quit app if close button is pressed
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 _running = False
