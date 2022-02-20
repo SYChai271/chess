@@ -243,7 +243,7 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     on_start()
-                selected_piece_prev = selected_piece
+            selected_piece_prev = selected_piece
 
         pygame.display.flip()
 
