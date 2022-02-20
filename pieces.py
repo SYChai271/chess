@@ -1,9 +1,5 @@
-import pygame
 import numpy as np
-import sys
-
-
-REVERSE_BOARD = True
+from constants import *
 
 
 class Piece:

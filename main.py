@@ -10,6 +10,18 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
 def on_start():
+    reset()
+    screen.fill(BG_COLOR)
+    draw_board()
+    # draw the pieces
+    for pieces in b_pieces.values():
+        draw_piece(pieces.color, pieces, pieces.pos)
+    for pieces in w_pieces.values():
+        draw_piece(pieces.color, pieces, pieces.pos)
+
+
+def reset():
+    # global variables
     global BOARD, b_pieces, w_pieces, turn, selected_piece, selected_piece_prev, selected_square
     turn = 'w'
     selected_piece = None
@@ -31,13 +43,6 @@ def on_start():
     w_pieces = {'rook1': Rook((0, 7), 'w'), 'rook2': Rook((7, 7), 'w'), 'knight1': Knight((1, 7), 'w'), 'knight2': Knight((6, 7), 'w'), 'bishop1': Bishop((2, 7), 'w'), 'bishop2': Bishop((5, 7), 'w'), 'queen': Queen((3, 7), 'w'), 'king': King(
         (4, 7), 'w'), 'pawn1': Pawn((0, 6), 'w'), 'pawn2': Pawn((1, 6), 'w'), 'pawn3': Pawn((2, 6), 'w'), 'pawn4': Pawn((3, 6), 'w'), 'pawn5': Pawn((4, 6), 'w'), 'pawn6': Pawn((5, 6), 'w'), 'pawn7': Pawn((6, 6), 'w'), 'pawn8': Pawn((7, 6), 'w')}
 
-    screen.fill(BG_COLOR)
-    draw_board()
-    for pieces in b_pieces.values():
-        draw_piece(pieces.color, pieces, pieces.pos)
-    for pieces in w_pieces.values():
-        draw_piece(pieces.color, pieces, pieces.pos)
-
 
 def draw_board():
     global board
@@ -52,9 +57,7 @@ def draw_board():
         for j in range(8):
             if BOARD[i, j] == 1:
                 draw_square('w', (i, j))
-    for i in range(8):
-        for j in range(8):
-            if BOARD[i, j] == 0:
+            else:
                 draw_square('b', (i, j))
 
 
@@ -103,12 +106,8 @@ def draw_piece(color, piece, pos):
 
 
 def highlight_selected_piece():
-    if selected_piece is not None and selected_piece_prev is None:
-        screen.fill(
-            SELECTED_SQUARE_COLOR, (selected_piece.pos[0] * SQUARE_SIZE, selected_piece.pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-        draw_piece(selected_piece.color,
-                   selected_piece, selected_piece.pos)
-    elif selected_piece is not None and selected_piece_prev is not None:
+    # fill previous selected piece position back to original colour
+    if selected_piece is not None and selected_piece_prev is not None:
         if BOARD[selected_piece_prev.pos[0]][selected_piece_prev.pos[1]] == 1:
             draw_square('w', selected_piece_prev.pos)
         else:
@@ -117,11 +116,11 @@ def highlight_selected_piece():
         draw_piece(selected_piece_prev.color,
                    selected_piece_prev, selected_piece_prev.pos)
 
-        screen.fill(
-            SELECTED_SQUARE_COLOR, (selected_piece.pos[0] * SQUARE_SIZE, selected_piece.pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+    screen.fill(
+        SELECTED_SQUARE_COLOR, (selected_piece.pos[0] * SQUARE_SIZE, selected_piece.pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
-        draw_piece(selected_piece.color,
-                   selected_piece, selected_piece.pos)
+    draw_piece(selected_piece.color,
+               selected_piece, selected_piece.pos)
 
 
 def get_clicked_square(pos):
@@ -141,20 +140,20 @@ def get_selected_square(pos):
 
 
 def highlight_valid_moves(moves):
-    if selected_piece is not None:
-        for move in moves:
-            screen.fill(
-                SELECTED_SQUARE_COLOR, (move[0] * SQUARE_SIZE, move[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-            for pieces in b_pieces.values():
-                if pieces.pos == move:
-                    draw_piece(pieces.color, pieces, pieces.pos)
-            for pieces in w_pieces.values():
-                if pieces.pos == move:
-                    draw_piece(pieces.color, pieces, pieces.pos)
+    for move in moves:
+        screen.fill(
+            SELECTED_SQUARE_COLOR, (move[0] * SQUARE_SIZE, move[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+        for pieces in b_pieces.values():
+            if pieces.pos == move:
+                draw_piece(pieces.color, pieces, pieces.pos)
+        for pieces in w_pieces.values():
+            if pieces.pos == move:
+                draw_piece(pieces.color, pieces, pieces.pos)
 
     if selected_piece != selected_piece_prev and selected_piece.color == turn and selected_piece_prev is not None:
-        moves = selected_piece_prev.valid_moves(board)
-        for move in moves:
+        moves_ = [move for move in selected_piece_prev.valid_moves(
+            board) if move not in moves]
+        for move in moves_:
             if BOARD[move[0]][move[1]] == 1:
                 draw_square('w', move)
             else:
@@ -217,10 +216,28 @@ def move(pos, moves):
     except:
         pass
 
+# get clicked square and if it is a piece, highlight valid moves
+# if it is a valid move, move the piece
+
+
+def handle_pieces():
+    global selected_piece, selected_piece_prev, selected_square
+    position = get_clicked_square(pygame.mouse.get_pos())
+    selected_square = get_selected_square(position)
+    selected_piece = selected_square if selected_square in b_pieces.values(
+    ) or selected_square in w_pieces.values() else selected_piece
+    if selected_piece is not None and selected_piece.color == turn:
+        highlight_selected_piece()
+        moves = selected_piece.valid_moves(board)
+        highlight_valid_moves(moves)
+    if selected_piece is not None:
+        move(selected_square, moves)
+    selected_piece_prev = selected_piece
 
 # main game logic and game loop
+
+
 def main():
-    global selected_piece, selected_piece_prev, selected_square
     on_start()
     _running = True
     while _running:
@@ -230,20 +247,10 @@ def main():
                 _running = False
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                position = get_clicked_square(pygame.mouse.get_pos())
-                selected_square = get_selected_square(position)
-                selected_piece = selected_square if selected_square in b_pieces.values(
-                ) or selected_square in w_pieces.values() else selected_piece
-                if selected_piece is not None and selected_piece.color == turn:
-                    highlight_selected_piece()
-                    moves = selected_piece.valid_moves(board)
-                    highlight_valid_moves(moves)
-                if selected_piece is not None:
-                    move(selected_square, moves)
+                handle_pieces()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     on_start()
-            selected_piece_prev = selected_piece
 
         pygame.display.flip()
 
