@@ -13,6 +13,9 @@ class Piece:
         self.color = color
         self.type = "Piece"
 
+    def get_piece_img(self, color, piece):
+        return 'images/{}_{}.png'.format(color.upper(), piece.type)
+
 
 class Pawn(Piece):
     def __init__(self, pos, color):
