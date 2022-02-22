@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+import sys
 from pieces import *
 from constants import *
 
@@ -115,10 +116,10 @@ def update_board():
 
     for pieces in b_pieces.values():
         draw_piece(pieces.color, pieces, pieces.pos)
-        board[pieces.pos[0]][pieces.pos[1]] = pieces.color
+        board[pieces.pos[0]][pieces.pos[1]] = pieces.color + '_' + pieces.type
     for pieces in w_pieces.values():
         draw_piece(pieces.color, pieces, pieces.pos)
-        board[pieces.pos[0]][pieces.pos[1]] = pieces.color
+        board[pieces.pos[0]][pieces.pos[1]] = pieces.color + '_' + pieces.type
     draw_borders()
 
 
@@ -242,6 +243,7 @@ def main():
             if event.type == pygame.QUIT:
                 _running = False
                 pygame.quit()
+                sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 handle_pieces()
             if event.type == pygame.KEYDOWN:
