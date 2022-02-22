@@ -13,6 +13,7 @@ def on_start():
     reset()
     screen.fill(BG_COLOR)
     draw_board()
+    update_board()
     # draw the pieces
     for pieces in b_pieces.values():
         draw_piece(pieces.color, pieces, pieces.pos)
@@ -22,11 +23,12 @@ def on_start():
 
 def reset():
     # global variables
-    global BOARD, b_pieces, w_pieces, turn, selected_piece, selected_piece_prev, selected_square
+    global BOARD, board, b_pieces, w_pieces, turn, selected_piece, selected_piece_prev, selected_square, highlighted_squares
     turn = 'w'
     selected_piece = None
     selected_square = None
     selected_piece_prev = None
+    highlighted_squares = []
 
     # BOARD constant that does not change
     # BOARD constatnt is in integer form and is used to represent black and white squares on the board
@@ -35,6 +37,7 @@ def reset():
     BOARD[1:: 2, :: 2] = 1
     # correctly orientate the board
     BOARD = np.flip(BOARD, 0)
+    board = BOARD.astype(str)
     # starting position of all the pieces on the board
     # (0, 0) top left
     # initiate the piece objects that is imported from pieces.py
@@ -45,13 +48,6 @@ def reset():
 
 
 def draw_board():
-    global board
-    board = BOARD.astype(str)
-    for pieces in b_pieces.values():
-        board[pieces.pos[0]][pieces.pos[1]] = pieces.color
-    for pieces in w_pieces.values():
-        board[pieces.pos[0]][pieces.pos[1]] = pieces.color
-
     # draw the board
     for i in range(8):
         for j in range(8):
@@ -59,44 +55,36 @@ def draw_board():
                 draw_square('w', (i, j))
             else:
                 draw_square('b', (i, j))
+    draw_borders()
 
 
 def reverse_board():
-    global board,  BOARD
+    global board, BOARD
     # reverse board
     # board variable is used to represent the board in string form
     # board variable is used to represent the pieces on the board (color)
     BOARD = np.flip(BOARD, 0)
-    board = np.flip(board, 0)
-
-    # draw the board
-    for i in range(8):
-        for j in range(8):
-            if BOARD[i, j] == 1:
-                draw_square('w', (i, j))
-    for i in range(8):
-        for j in range(8):
-            if BOARD[i, j] == 0:
-                draw_square('b', (i, j))
+    board = BOARD.astype(str)
 
     # update pieces pos
     for pieces in b_pieces.values():
         pieces.pos = (abs(7-pieces.pos[0]), abs(7-pieces.pos[1]))
         board[pieces.pos[0]][pieces.pos[1]] = pieces.color
-        draw_piece(pieces.color, pieces, pieces.pos)
 
     for pieces in w_pieces.values():
         pieces.pos = (abs(7-pieces.pos[0]), abs(7-pieces.pos[1]))
         board[pieces.pos[0]][pieces.pos[1]] = pieces.color
-        draw_piece(pieces.color, pieces, pieces.pos)
 
 
 def draw_square(color, pos):
     if color == 'b':
         pygame.draw.rect(screen, BLACK_SQUARE,
                          (pos[0] * SQUARE_SIZE, pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-    else:
+    elif color == 'w':
         pygame.draw.rect(screen, WHITE_SQUARE,
+                         (pos[0] * SQUARE_SIZE, pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+    else:
+        pygame.draw.rect(screen, SELECTED_SQUARE_COLOR,
                          (pos[0] * SQUARE_SIZE, pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
 
@@ -105,22 +93,45 @@ def draw_piece(color, piece, pos):
         piece.get_piece_img(color, piece)), (pos[0] * SQUARE_SIZE+PIECE_PADDING, pos[1] * SQUARE_SIZE+PIECE_PADDING))
 
 
+def draw_borders():
+    for i in range(WIDTH//SQUARE_SIZE+1):
+        pygame.draw.line(screen, BORDER_COLOR,
+                         (i * SQUARE_SIZE, 0), (i * SQUARE_SIZE, 640))
+        pygame.draw.line(screen, BORDER_COLOR,
+                         (0, i * SQUARE_SIZE), (640, i * SQUARE_SIZE))
+
+
+def update_board():
+    global board, highlighted_squares
+    for i in range(8):
+        for j in range(8):
+            if BOARD[i, j] == 1:
+                draw_square('w', (i, j))
+            if BOARD[i, j] == 0:
+                draw_square('b', (i, j))
+    for square in highlighted_squares if highlighted_squares else []:
+        draw_square('h', square)
+    highlighted_squares = []
+
+    for pieces in b_pieces.values():
+        draw_piece(pieces.color, pieces, pieces.pos)
+        board[pieces.pos[0]][pieces.pos[1]] = pieces.color
+    for pieces in w_pieces.values():
+        draw_piece(pieces.color, pieces, pieces.pos)
+        board[pieces.pos[0]][pieces.pos[1]] = pieces.color
+    draw_borders()
+
+
 def highlight_selected_piece():
+    global highlighted_squares
     # fill previous selected piece position back to original colour
     if selected_piece is not None and selected_piece_prev is not None:
         if BOARD[selected_piece_prev.pos[0]][selected_piece_prev.pos[1]] == 1:
-            draw_square('w', selected_piece_prev.pos)
+            board[selected_piece_prev.pos[0]][selected_piece_prev.pos[1]] = '1'
         else:
-            draw_square('b', selected_piece_prev.pos)
+            board[selected_piece_prev.pos[0]][selected_piece_prev.pos[1]] = '0'
 
-        draw_piece(selected_piece_prev.color,
-                   selected_piece_prev, selected_piece_prev.pos)
-
-    screen.fill(
-        SELECTED_SQUARE_COLOR, (selected_piece.pos[0] * SQUARE_SIZE, selected_piece.pos[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-
-    draw_piece(selected_piece.color,
-               selected_piece, selected_piece.pos)
+    highlighted_squares.append(selected_piece.pos)
 
 
 def get_clicked_square(pos):
@@ -140,63 +151,43 @@ def get_selected_square(pos):
 
 
 def highlight_valid_moves(moves):
+    global highlighted_squares
     for move in moves:
-        screen.fill(
-            SELECTED_SQUARE_COLOR, (move[0] * SQUARE_SIZE, move[1] * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-        for pieces in b_pieces.values():
-            if pieces.pos == move:
-                draw_piece(pieces.color, pieces, pieces.pos)
-        for pieces in w_pieces.values():
-            if pieces.pos == move:
-                draw_piece(pieces.color, pieces, pieces.pos)
+        highlighted_squares.append(move)
 
     if selected_piece != selected_piece_prev and selected_piece.color == turn and selected_piece_prev is not None:
         moves_ = [move for move in selected_piece_prev.valid_moves(
             board) if move not in moves]
         for move in moves_:
             if BOARD[move[0]][move[1]] == 1:
-                draw_square('w', move)
+                board[move[0]][move[1]] = '1'
             else:
-                draw_square('b', move)
+                board[move[0]][move[1]] = '0'
 
 
 def move(pos, moves):
-    global selected_square, selected_piece, selected_piece_prev, turn
+    global selected_square, selected_piece, selected_piece_prev, turn, highlighted_squares
     try:
         if pos in moves:
             if BOARD[selected_piece.pos[0]][selected_piece.pos[1]] == 1:
-                draw_square('w', selected_piece.pos)
                 board[selected_piece.pos[0]
                       ][selected_piece.pos[1]] = '1'
             else:
-                draw_square('b', selected_piece.pos)
                 board[selected_piece.pos[0]
                       ][selected_piece.pos[1]] = '0'
             for move in moves:
                 if BOARD[move[0]][move[1]] == 1:
-                    draw_square('w', move)
+                    board[selected_piece.pos[0]][selected_piece.pos[1]] = '1'
                 else:
-                    draw_square('b', move)
-            draw_piece(selected_piece.color,
-                       selected_piece, pos)
-
+                    board[selected_piece.pos[0]][selected_piece.pos[1]] = '0'
             if turn == 'b':
                 turn = 'w'
-                for pieces in w_pieces.values():
-                    if pieces.pos != pos:
-                        draw_piece(
-                            pieces.color, pieces, pieces.pos)
                 for key, value in w_pieces.items():
                     if value.pos == pos:
                         del w_pieces[key]
                         break
             else:
                 turn = 'b'
-                for pieces in b_pieces.values():
-                    if pieces.pos != pos:
-                        draw_piece(
-                            pieces.color, pieces, pieces.pos)
-
                 for key, value in b_pieces.items():
                     if value.pos == pos:
                         del b_pieces[key]
@@ -211,7 +202,9 @@ def move(pos, moves):
             selected_piece_prev = None
             selected_piece = None
             selected_square = None
+            highlighted_squares = []
             if REVERSE_BOARD:
+                update_board()
                 reverse_board()
     except:
         pass
@@ -226,12 +219,16 @@ def handle_pieces():
     selected_square = get_selected_square(position)
     selected_piece = selected_square if selected_square in b_pieces.values(
     ) or selected_square in w_pieces.values() else selected_piece
+    # deselect piece
+    if selected_piece == selected_piece_prev and selected_piece == selected_square:
+        selected_piece = None
     if selected_piece is not None and selected_piece.color == turn:
         highlight_selected_piece()
         moves = selected_piece.valid_moves(board)
         highlight_valid_moves(moves)
     if selected_piece is not None:
         move(selected_square, moves)
+    update_board()
     selected_piece_prev = selected_piece
 
 # main game logic and game loop
