@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import sys
+import copy
 from pieces import *
 from constants import *
 
@@ -38,9 +39,9 @@ def reset():
     # starting position of all the pieces on the board
     # (0, 0) top left
     # initiate the piece objects that is imported from pieces.py
-    w_pieces = {'rook1': Rook((0, 7), 'w', 1), 'rook2': Rook((7, 7), 'w', 2), 'knight1': Knight((1, 7), 'w', 1), 'knight2': Knight((6, 7), 'w', 2), 'bishop1': Bishop((2, 7), 'w', 1), 'bishop2': Bishop((5, 7), 'w', 2), 'queen': Queen((3, 7), 'w', 1), 'king': King(
+    w_pieces = {'rook1': Rook((0, 7), 'w', 1), 'rook2': Rook((7, 7), 'w', 2), 'knight1': Knight((1, 7), 'w', 1), 'knight2': Knight((6, 7), 'w', 2), 'bishop1': Bishop((2, 7), 'w', 1), 'bishop2': Bishop((5, 7), 'w', 2), 'queen1': Queen((3, 7), 'w', 1), 'king1': King(
         (4, 7), 'w', 1), 'pawn1': Pawn((0, 6), 'w', 1), 'pawn2': Pawn((1, 6), 'w', 2), 'pawn3': Pawn((2, 6), 'w', 3), 'pawn4': Pawn((3, 6), 'w', 4), 'pawn5': Pawn((4, 6), 'w', 5), 'pawn6': Pawn((5, 6), 'w', 6), 'pawn7': Pawn((6, 6), 'w', 7), 'pawn8': Pawn((7, 6), 'w', 8)}
-    b_pieces = {'rook1': Rook((0, 0), 'b', 1), 'rook2': Rook((7, 0), 'b', 2), 'knight1': Knight((1, 0), 'b', 1), 'knight2': Knight((6, 0), 'b', 2), 'bishop1': Bishop((2, 0), 'b', 1), 'bishop2': Bishop((5, 0), 'b', 2), 'queen': Queen((3, 0), 'b', 1), 'king': King(
+    b_pieces = {'rook1': Rook((0, 0), 'b', 1), 'rook2': Rook((7, 0), 'b', 2), 'knight1': Knight((1, 0), 'b', 1), 'knight2': Knight((6, 0), 'b', 2), 'bishop1': Bishop((2, 0), 'b', 1), 'bishop2': Bishop((5, 0), 'b', 2), 'queen1': Queen((3, 0), 'b', 1), 'king1': King(
         (4, 0), 'b', 1), 'pawn1': Pawn((0, 1), 'b', 1), 'pawn2': Pawn((1, 1), 'b', 2), 'pawn3': Pawn((2, 1), 'b', 3), 'pawn4': Pawn((3, 1), 'b', 4), 'pawn5': Pawn((4, 1), 'b', 5), 'pawn6': Pawn((5, 1), 'b', 6), 'pawn7': Pawn((6, 1), 'b', 7), 'pawn8': Pawn((7, 1), 'b', 8)}
 
 
@@ -187,6 +188,68 @@ def take_back():
     turn = 'w' if turn == 'b' else 'b'
     update_board()
 
+# check if move will cause king to be checked
+
+
+def check_moves(moves):
+    rejected_moves = []
+    for i in range(len(moves)):
+        _board = board.copy()
+        _w_pieces = copy.deepcopy(w_pieces)
+        _b_pieces = copy.deepcopy(b_pieces)
+        if turn == 'w':
+            piece = _w_pieces.get(
+                selected_piece.type.lower()+str(selected_piece.num))
+        else:
+            piece = _b_pieces.get(
+                selected_piece.type.lower()+str(selected_piece.num))
+        _board, piece = _do_move(piece, moves[i], _board)
+        if is_in_check(turn, board, _w_pieces, _b_pieces):
+            rejected_moves.append(moves[i])
+    moves = [move for move in moves if move not in rejected_moves]
+    return moves
+
+
+def _do_move(piece, move, _board):
+    _board[piece.pos[0]][piece.pos[1]] = str(BOARD[piece.pos[0]][piece.pos[1]])
+    _board[move[0]][move[1]] = piece.name
+    piece.pos = move
+    return _board, piece
+
+
+def get_king(color, w_pieces, b_pieces):
+    if color == 'w':
+        return w_pieces.get('king1')
+    else:
+        return b_pieces.get('king1')
+
+
+def get_enemy(color):
+    return 'b' if color == 'w' else 'w'
+
+
+def get_all_possible_moves(color, board, w_pieces, b_pieces):
+    result = []
+    if color == 'w':
+        for piece in w_pieces.values():
+            result += piece.valid_moves(board)
+    else:
+        for piece in b_pieces.values():
+            result += piece.valid_moves(board)
+    return result
+
+
+def is_in_check(color, board, w_pieces, b_pieces):
+    king = get_king(color, w_pieces, b_pieces)
+    enemy = get_enemy(color)
+    return king.pos in get_all_possible_moves(enemy, board, w_pieces, b_pieces)
+
+
+def checkmate(color):
+    if get_all_possible_moves(color, board, w_pieces, b_pieces) == [] and is_in_check(color, board, w_pieces, b_pieces):
+        return True
+    return False
+
 
 def move(pos, moves):
     global selected_square, selected_piece, selected_piece_prev, previous_board, turn, highlighted_squares
@@ -199,11 +262,6 @@ def move(pos, moves):
             else:
                 board[selected_piece.pos[0]
                       ][selected_piece.pos[1]] = '0'
-            for move in moves:
-                if BOARD[move[0]][move[1]] == 1:
-                    board[selected_piece.pos[0]][selected_piece.pos[1]] = '1'
-                else:
-                    board[selected_piece.pos[0]][selected_piece.pos[1]] = '0'
             if turn == 'b':
                 turn = 'w'
                 for key, value in w_pieces.items():
@@ -246,12 +304,14 @@ def handle_click():
     # deselect piece
     if selected_piece == selected_piece_prev and selected_piece == selected_square:
         selected_piece = None
-    if selected_piece is not None and selected_piece.color == turn:
+    if selected_piece and selected_piece.color == turn and selected_piece:
         highlight_selected_piece()
-        moves = selected_piece.valid_moves(board)
+        moves = check_moves(selected_piece.valid_moves(board))
         highlight_valid_moves(moves)
-    if selected_piece is not None:
+    if selected_piece:
         move(selected_square, moves)
+        if checkmate(turn):
+            print(get_enemy(turn)+' wins!')
     update_board()
     selected_piece_prev = selected_piece
 
