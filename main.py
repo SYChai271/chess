@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
 import sys
-import copy
+from copy import deepcopy
 from pieces import *
 from constants import *
 
@@ -195,8 +195,8 @@ def check_moves(moves):
     rejected_moves = []
     for i in range(len(moves)):
         _board = board.copy()
-        _w_pieces = copy.deepcopy(w_pieces)
-        _b_pieces = copy.deepcopy(b_pieces)
+        _w_pieces = deepcopy(w_pieces)
+        _b_pieces = deepcopy(b_pieces)
         if turn == 'w':
             piece = _w_pieces.get(
                 selected_piece.type.lower()+str(selected_piece.num))
