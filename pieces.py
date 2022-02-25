@@ -3,23 +3,25 @@ from constants import *
 
 
 class Piece:
-    def __init__(self, pos, color):
+    def __init__(self, pos, color, num):
         self.pos = pos
         self.row, self.col = pos[0], pos[1]
         self.color = color
         self.type = "Piece"
+        self.num = num
 
     def get_piece_img(self, color, piece):
         return 'images/{}_{}.png'.format(color.upper(), piece.type)
 
 
 class Pawn(Piece):
-    def __init__(self, pos, color):
-        super().__init__(pos, color)
+    def __init__(self, pos, color, num):
+        super().__init__(pos, color, num)
         self.en_peasant = False
         self.first = True
         self.promote = False
         self.type = "Pawn"
+        self.name = self.color + '_' + self.type + str(self.num)
 
     def valid_moves(self, board):
         i = self.pos[0]
@@ -116,10 +118,11 @@ class Pawn(Piece):
 
 
 class Rook(Piece):
-    def __init__(self, pos, color):
-        super().__init__(pos, color)
+    def __init__(self, pos, color, num):
+        super().__init__(pos, color, num)
         self.first = True
         self.type = "Rook"
+        self.name = self.color + '_' + self.type + str(self.num)
 
     def valid_moves(self, board):
         i = self.pos[0]
@@ -175,9 +178,10 @@ class Rook(Piece):
 
 
 class Knight(Piece):
-    def __init__(self, pos, color):
-        super().__init__(pos, color)
+    def __init__(self, pos, color, num):
+        super().__init__(pos, color, num)
         self.type = "Knight"
+        self.name = self.color + '_' + self.type + str(self.num)
 
     def valid_moves(self, board):
         i = self.pos[0]
@@ -249,9 +253,10 @@ class Knight(Piece):
 
 
 class Bishop(Piece):
-    def __init__(self, pos, color):
-        super().__init__(pos, color)
+    def __init__(self, pos, color, num):
+        super().__init__(pos, color, num)
         self.type = "Bishop"
+        self.name = self.color + '_' + self.type + str(self.num)
 
     def valid_moves(self, board):
         i = self.pos[0]
@@ -327,9 +332,10 @@ class Bishop(Piece):
 
 
 class Queen(Piece):
-    def __init__(self, pos, color):
-        super().__init__(pos, color)
+    def __init__(self, pos, color, num):
+        super().__init__(pos, color, num)
         self.type = "Queen"
+        self.name = self.color + '_' + self.type + str(self.num)
 
     def valid_moves(self, board):
         i = self.pos[0]
@@ -441,10 +447,11 @@ class Queen(Piece):
 
 
 class King(Piece):
-    def __init__(self, pos, color):
-        super().__init__(pos, color)
+    def __init__(self, pos, color, num):
+        super().__init__(pos, color, num)
         self.first = True
         self.type = "King"
+        self.name = self.color + '_' + self.type + str(self.num)
 
     def valid_moves(self, board):
         i = self.pos[0]
