@@ -16,11 +16,6 @@ def on_start():
     screen.fill(BG_COLOR)
     draw_board()
     update_board()
-    # draw the pieces
-    for pieces in b_pieces.values():
-        draw_piece(pieces.color, pieces, pieces.pos)
-    for pieces in w_pieces.values():
-        draw_piece(pieces.color, pieces, pieces.pos)
 
 
 def reset():
@@ -122,7 +117,6 @@ def update_board():
         draw_piece(pieces.color, pieces, pieces.pos)
         board[pieces.pos[0]][pieces.pos[1]] = pieces.name
     draw_borders()
-    print(board)
 
 
 def highlight_selected_piece():
