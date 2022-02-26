@@ -170,18 +170,10 @@ def take_back():
                     for piece in b_pieces.values():
                         if piece.name == s:
                             piece.pos = (i, j)
-                            try:
-                                piece.first = True
-                            except:
-                                pass
                 elif s[0] == 'w':
                     for piece in w_pieces.values():
                         if piece.name == s:
                             piece.pos = (i, j)
-                            try:
-                                piece.first = True
-                            except:
-                                pass
                 else:
                     continue
     board = previous_board
@@ -311,7 +303,7 @@ def handle_click():
     if selected_piece:
         move(selected_square, moves)
         if checkmate(turn):
-            print(get_enemy(turn)+' wins!')
+            print('white' if turn == 'b' else 'black' + ' wins!')
     update_board()
     selected_piece_prev = selected_piece
 

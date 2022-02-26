@@ -104,12 +104,9 @@ class Pawn(Piece):
                             moves.append((i + 1, j - 1))
 
                 if self.first:
-                    if i >= 0:
-                        p = board[i][j - 2]
-                        if p[0] == '0' or p[0] == '1':
-                            if board[i][j - 1] == '0' or board[i][j - 1] == '1':
-                                moves.append((i, j - 2))
-                        elif p[0] != self.color:
+                    p = board[i][j - 2]
+                    if p[0] == '0' or p[0] == '1' or p[0] != self.color:
+                        if board[i][j - 1][0] == '0' or board[i][j - 1][0] == '1' or board[i][j - 1][0] != self.color:
                             moves.append((i, j - 2))
         except:
             pass
