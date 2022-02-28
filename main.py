@@ -1,6 +1,5 @@
 import pygame
 import sys
-from pieces import *
 from constants import *
 from board import *
 
