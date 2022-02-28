@@ -165,8 +165,6 @@ class Board:
                 self.selected_piece.type.lower()+str(self.selected_piece.num))
             _piece_board, _piece = self._do_move(
                 _piece, moves[i], _piece_board, _board)
-            print([piece.name + str(piece.pos)
-                  for piece in _pieces['w'].values()])
             if self.is_in_check(self.turn, _piece_board, _pieces):
                 rejected_moves.append(moves[i])
         moves = [move for move in moves if move not in rejected_moves]
@@ -222,18 +220,24 @@ class Board:
                 else:
                     self.piece_board[self.selected_piece.pos[0]
                                      ][self.selected_piece.pos[1]] = '0'
-                for color, pieces in self.pieces.items():
-                    for piece in pieces.values():
-                        if piece.pos == self.selected_piece.pos and piece.color != color:
-                            del self.pieces[color][piece.type.lower(
-                            ) + str(piece.num)]
+                if self.turn == 'b':
+                    self.turn = 'w'
+                    for key, value in self.w_pieces.items():
+                        if value.pos == pos:
+                            del self.w_pieces[key]
+                            break
+                else:
+                    self.turn = 'b'
+                    for key, value in self.b_pieces.items():
+                        if value.pos == pos:
+                            del self.b_pieces[key]
+                            break
                 try:
                     self.selected_piece.first = False
                 except:
                     pass
                 self.selected_piece.pos = pos
                 self.piece_board[pos[0]][pos[1]] = self.selected_piece.name
-                self.turn = 'w' if self.turn == 'b' else 'b'
                 self.elected_piece_prev = None
                 self.selected_piece = None
                 self.selected_square = None
