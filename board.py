@@ -5,6 +5,10 @@ from constants import *
 from pieces import *
 
 
+class GameOver(Exception):
+    pass
+
+
 class Board:
     def __init__(self, screen):
         self.screen = screen
@@ -17,6 +21,7 @@ class Board:
         self.selected_piece_prev = None
         self.highlighted_squares = []
         self.board = self.get_board()
+        self.game_over = False
         # starting position of all the pieces on the board
         # (0, 0) top left
         # initiate the piece objects that is imported from pieces.py
@@ -201,14 +206,30 @@ class Board:
         return king.pos in self.get_all_possible_moves(enemy, piece_board, pieces)
 
     def checkmate(self, color):
-        if self.get_all_possible_moves(color, self.piece_board, self.pieces) == [] and self.is_in_check(color, self.piece_board, self.pieces):
+        if self.check_moves(self.get_all_possible_moves(color, self.piece_board, self.pieces)) == [] and self.is_in_check(color, self.piece_board, self.pieces):
             return True
         return False
 
     def stalemate(self, color):
-        if self.get_all_possible_moves(color, self.piece_board, self.pieces) == [] and not self.is_in_check(color, self.piece_board, self.pieces):
+        if self.check_moves(self.get_all_possible_moves(color, self.piece_board, self.pieces)) == [] and not self.is_in_check(color, self.piece_board, self.pieces):
             return True
         return False
+
+    def get_winner(self):
+        if self.checkmate('w'):
+            return 'Black'
+        if self.checkmate('b'):
+            return 'White'
+        return None
+
+    def get_draw(self):
+        if self.stalemate('w') and self.stalemate('b'):
+            return True
+        return False
+
+    # check if the game is over
+    def _game_over(self):
+        return True if self.get_winner() or self.get_draw() else False
 
     def move(self, pos, moves):
         try:
@@ -238,12 +259,15 @@ class Board:
                     pass
                 self.selected_piece.pos = pos
                 self.piece_board[pos[0]][pos[1]] = self.selected_piece.name
-                self.elected_piece_prev = None
+                self.update_board()
+                self.highlighted_squares = []
+                if self._game_over():
+                    self.game_over = True
+                    return
+                self.selected_piece_prev = None
                 self.selected_piece = None
                 self.selected_square = None
-                self.highlighted_squares = []
                 if REVERSE_BOARD:
-                    self.update_board()
                     self.reverse_board()
         except:
             pass
@@ -261,9 +285,10 @@ class Board:
             moves = self.check_moves(
                 self.selected_piece.valid_moves(self.piece_board))
             self.highlight_valid_moves(moves)
-        if self.selected_piece:
+        if self.selected_piece and self.selected_piece.pos != self.selected_square:
             self.move(self.selected_square, moves)
-            if self.checkmate(self.turn):
-                print('white' if self.turn == 'b' else 'black' + ' wins!')
+            if self.game_over:
+                self.update_board()
+                return
         self.update_board()
         self.selected_piece_prev = self.selected_piece

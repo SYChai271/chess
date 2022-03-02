@@ -4,6 +4,7 @@ from constants import *
 from board import *
 
 pygame.init()
+pygame.font.init()
 
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -18,6 +19,26 @@ def on_start():
     board.update_board()
 
 
+def game_over(color):
+    game_over_message = 'Checkmate! ' + color + ' wins!'
+    font = pygame.font.SysFont('Arial', 30, bold=True)
+    text = font.render(game_over_message, True, (255, 255, 255))
+    screen.blit(text, (WIDTH/2 - text.get_width() /
+                2, HEIGHT/2 - text.get_height()/2))
+    pygame.display.flip()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_r:
+                    main()
+
+
 def main():
     on_start()
     _running = True
@@ -29,6 +50,8 @@ def main():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 board.handle_click()
+                if board.game_over:
+                    game_over(board.get_winner())
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     _running = False
