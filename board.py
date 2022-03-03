@@ -228,46 +228,43 @@ class Board:
     def _game_over(self):
         return True if self.get_winner() or self.get_draw() else False
 
-    def move(self, pos, moves):
+    def move(self, pos):
+        self.previous_board = np.copy(self.piece_board)
+        if self.board[self.selected_piece.pos[0]][self.selected_piece.pos[1]] == 1:
+            self.piece_board[self.selected_piece.pos[0]
+                                ][self.selected_piece.pos[1]] = '1'
+        else:
+            self.piece_board[self.selected_piece.pos[0]
+                                ][self.selected_piece.pos[1]] = '0'
+        if self.turn == 'b':
+            self.turn = 'w'
+            for key, value in self.w_pieces.items():
+                if value.pos == pos:
+                    del self.w_pieces[key]
+                    break
+        else:
+            self.turn = 'b'
+            for key, value in self.b_pieces.items():
+                if value.pos == pos:
+                    del self.b_pieces[key]
+                    break
         try:
-            if pos in moves:
-                self.previous_board = np.copy(self.piece_board)
-                if self.board[self.selected_piece.pos[0]][self.selected_piece.pos[1]] == 1:
-                    self.piece_board[self.selected_piece.pos[0]
-                                     ][self.selected_piece.pos[1]] = '1'
-                else:
-                    self.piece_board[self.selected_piece.pos[0]
-                                     ][self.selected_piece.pos[1]] = '0'
-                if self.turn == 'b':
-                    self.turn = 'w'
-                    for key, value in self.w_pieces.items():
-                        if value.pos == pos:
-                            del self.w_pieces[key]
-                            break
-                else:
-                    self.turn = 'b'
-                    for key, value in self.b_pieces.items():
-                        if value.pos == pos:
-                            del self.b_pieces[key]
-                            break
-                try:
-                    self.selected_piece.first = False
-                except:
-                    pass
-                self.selected_piece.pos = pos
-                self.piece_board[pos[0]][pos[1]] = self.selected_piece.name
-                self.update_board()
-                self.highlighted_squares = []
-                if self._game_over():
-                    self.game_over = True
-                    return
-                self.selected_piece_prev = None
-                self.selected_piece = None
-                self.selected_square = None
-                if REVERSE_BOARD:
-                    self.reverse_board()
+            self.selected_piece.first = False
         except:
             pass
+        self.selected_piece.pos = pos
+        self.piece_board[pos[0]][pos[1]] = self.selected_piece.name
+        self.update_board()
+        self.highlighted_squares = []
+        if self._game_over():
+            self.game_over = True
+            return
+        self.selected_piece_prev = None
+        self.selected_piece = None
+        self.selected_square = None
+        if REVERSE_BOARD:
+            self.reverse_board()
+
 
     def handle_click(self):
         position = self.get_clicked_square(pygame.mouse.get_pos())
@@ -282,7 +279,7 @@ class Board:
             moves = self.check_moves(
                 self.selected_piece.valid_moves(self.piece_board))
             self.highlight_valid_moves(moves)
-        if self.selected_piece and self.selected_piece.pos != self.selected_square:
-            self.move(self.selected_square, moves)
+        if self.selected_piece and self.selected_square in moves:
+            self.move(self.selected_square)
         self.update_board()
         self.selected_piece_prev = self.selected_piece

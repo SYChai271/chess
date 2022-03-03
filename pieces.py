@@ -44,10 +44,10 @@ class Pawn(Piece):
                                     moves.append((i + 1, j + 1))
 
                         if j > 0:
-                            p = board[i + 1][j - 1]
+                            p = board[i - 1][j + 1]
                             if p[0] != '0' and p[0] != '1':
                                 if p[0] != self.color:
-                                    moves.append((i + 1, j - 1))
+                                    moves.append((i - 1, j + 1))
 
                     if self.first:
                         if i < 8:
