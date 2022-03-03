@@ -5,10 +5,6 @@ from constants import *
 from pieces import *
 
 
-class GameOver(Exception):
-    pass
-
-
 class Board:
     def __init__(self, screen):
         self.screen = screen
@@ -287,8 +283,5 @@ class Board:
             self.highlight_valid_moves(moves)
         if self.selected_piece and self.selected_piece.pos != self.selected_square:
             self.move(self.selected_square, moves)
-            if self.game_over:
-                self.update_board()
-                return
         self.update_board()
         self.selected_piece_prev = self.selected_piece
