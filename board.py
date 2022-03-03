@@ -132,7 +132,8 @@ class Board:
 
     # undo previous move
     def take_back(self):
-        self.reverse_board()
+        if REVERSE_BOARD:
+            self.reverse_board()
         self.update_board()
         # iterate through board and update pieces
         for i in range(len(self.previous_board)):

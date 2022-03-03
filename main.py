@@ -22,7 +22,8 @@ def on_start():
 def game_over(color):
     game_over_message = 'Checkmate! ' + color + ' wins!'
     font = pygame.font.SysFont('Arial', 30, bold=True)
-    text = font.render(game_over_message, True, (255, 255, 255) if color == 'White' else (0, 0, 0))
+    text = font.render(game_over_message, True, (255, 255, 255)
+                       if color == 'White' else (0, 0, 0))
     screen.blit(text, (WIDTH/2 - text.get_width() /
                 2, HEIGHT/2 - text.get_height()/2))
     pygame.display.flip()
