@@ -45,6 +45,7 @@ class Board:
         board = np.zeros((8, 8), dtype=int)
         board[:: 2, 1:: 2] = 1
         board[1:: 2, :: 2] = 1
+        board = np.flip(board, 0)
         return board
 
     def get_piece_board(self):
