@@ -1,5 +1,5 @@
 import numpy as np
-from constants import *
+from settings import *
 
 
 class Piece:

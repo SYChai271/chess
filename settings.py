@@ -9,4 +9,4 @@ BORDER_COLOR = (0, 0, 0)
 SQUARE_SIZE = 80
 PIECE_PADDING = 10 
 
-REVERSE_BOARD = False # if True, the board orientation is reversed
+REVERSE_BOARD = True # if True, the board orientation is reversed

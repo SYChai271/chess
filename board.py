@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
 from copy import deepcopy
-from constants import *
+from settings import *
 from pieces import *
 
 

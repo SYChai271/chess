@@ -1,6 +1,6 @@
 import pygame
 import sys
-from constants import *
+from settings import *
 from board import *
 
 pygame.init()
