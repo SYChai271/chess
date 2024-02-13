@@ -283,13 +283,9 @@ class Board:
     def move(self, pos):
         self.previous_board = np.copy(self.piece_board)
         if self.board[self.selected_piece.pos[0]][self.selected_piece.pos[1]] == 1:
-            self.piece_board[self.selected_piece.pos[0]][
-                self.selected_piece.pos[1]
-            ] = "1"
+            self.piece_board[self.selected_piece.pos[0]][self.selected_piece.pos[1]] = "1"
         else:
-            self.piece_board[self.selected_piece.pos[0]][
-                self.selected_piece.pos[1]
-            ] = "0"
+            self.piece_board[self.selected_piece.pos[0]][self.selected_piece.pos[1]] = "0"
         if self.turn == "b":
             self.turn = "w"
             for key, value in self.w_pieces.items():
@@ -334,11 +330,7 @@ class Board:
             and self.selected_piece == self.selected_square
         ):
             self.selected_piece = None
-        if (
-            self.selected_piece
-            and self.selected_piece.color == self.turn
-            and self.selected_piece
-        ):
+        if self.selected_piece and self.selected_piece.color == self.turn and self.selected_piece:
             self.highlight_selected_piece()
             moves = self.check_moves(self.selected_piece.valid_moves(self.piece_board))
             self.highlight_valid_moves(moves)
